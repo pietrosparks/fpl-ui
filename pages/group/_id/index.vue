@@ -1,20 +1,18 @@
 <template>
-  <div>
+  <div v-cloak>
     <div class="container">
       <navbar/>
       <div class="row">
         <div class="col-md-6">
           <h1 class="display-2">{{ league.name }}</h1>
         </div>
-        <div class="col-md-6">
+        <div v-if="isAdmin" class="col-md-6">
           <b-button class="btn btn-info btn-lg mt-4 float-right" @click="modalShow = !modalShow">
             Register Group
           </b-button>
         </div>
       </div>
      
-    
-
       <hr>
       <h1 class="display-6">Members</h1>
       <div>
@@ -92,14 +90,12 @@
 
 <script>
 import Navbar from "~/components/shared/navbar"
-import VueFrame from "vue-frame"
 import { mapGetters } from "vuex"
 
 export default {
   name: "Group",
   components: {
-    Navbar,
-    VueFrame
+    Navbar
   },
   data() {
     return {
@@ -130,7 +126,7 @@ export default {
       })
   },
   computed: {
-    ...mapGetters(["user"]),
+    ...mapGetters(["user", "userInfo"]),
     paymentActive() {
       return this.groupData === null ? false : true
     },
@@ -177,17 +173,17 @@ export default {
         }
       })
       return formatted
+    },
+    isAdmin() {
+      return this.user.id == this.league.admin_entry
     }
   },
   methods: {
-    openGroup(id) {
-      this.$router.push(`/group/${id}`)
-    },
     registerGroup() {
       this.group.groupId = this.$route.params.id
       this.group.name = this.league.name
       this.group.groupAdmin = this.league.admin_entry
-      this.group.adminMail = this.user
+      this.group.adminMail = this.user.email
       this.group.totalAmount = this.totalCollectionAmount
       this.group.members = this.formattedMembers
       this.group.started = this.currentGameweek.id

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="userInfo">
     <section class="container">
       <navbar/>
       <div class="row mt-5">
@@ -39,32 +39,35 @@
 
 <script>
 import Navbar from "~/components/shared/navbar"
+import { mapGetters } from "vuex"
 
 export default {
   components: {
     Navbar
   },
-  data() {
-    return {
-      user: {}
-    }
-  },
-  async asyncData({ app }) {
-    return app.$axios.$get("http://localhost:5000/fpl/user").then(resp => {
-      console.log(app.$axios.defaults.headers.common, "resp")
-      console.log(resp, "reeeeee")
-      return {
-        user: resp.data.body
-      }
-    })
-  },
   computed: {
+    ...mapGetters(["userInfo"]),
     player() {
-      return this.user.player
+      return this.userInfo.player
     },
     entry() {
-      return this.user.entry
+      return this.userInfo.entry
     }
+  },
+  created() {
+    return this.$axios
+      .$get("http://localhost:5000/fpl/user")
+      .then(resp => {
+        if (resp.data.body && resp.data.body.entry === null) {
+          this.$toast.error("You have no fantasy team setup")
+          return this.$store.dispatch("logout")
+        }
+        this.$store.commit("setUserInfo", resp.data.body)
+        this.$store.commit("setUserId", resp.data.body.entry.id)
+      })
+      .catch(err => {
+        console.log(err)
+      })
   },
   methods: {}
 }

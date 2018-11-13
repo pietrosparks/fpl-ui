@@ -34,7 +34,20 @@ module.exports = {
       }
     }
   },
-  modules: ["@nuxtjs/axios", "bootstrap-vue/nuxt", "@nuxtjs/font-awesome"],
+  modules: [
+    "@nuxtjs/axios",
+    "bootstrap-vue/nuxt",
+    "@nuxtjs/font-awesome",
+    "@nuxtjs/toast"
+  ],
+  toast: {
+    position: "top-right",
+    duration: 3000
+  },
   css: [],
-  plugins: ["~/plugins/auth"]
+  plugins: [
+    "~/plugins/auth",
+    "~/plugins/filters.js",
+    { src: "~/plugins/vue-frame", ssr: false }
+  ]
 }
