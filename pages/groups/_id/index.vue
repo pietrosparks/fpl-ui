@@ -24,12 +24,21 @@
 import Navbar from "~/components/shared/navbar"
 
 export default {
+  middleware: "authenticated",
   name: "Groups",
   components: {
     Navbar
   },
   data() {
-    return {}
+    return {
+      isConnected: false
+    }
+  },
+  sockets: {
+    connect() {
+      // Fired when the socket connects.
+      this.isConnected = true
+    }
   },
   async asyncData({ app, params }) {
     return app.$axios

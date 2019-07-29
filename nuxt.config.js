@@ -48,6 +48,7 @@ module.exports = {
   plugins: [
     "~/plugins/auth",
     "~/plugins/filters.js",
+    { src: "~/plugins/socket-io.js", ssr: false },
     { src: "~/plugins/vue-frame", ssr: false }
   ]
 }

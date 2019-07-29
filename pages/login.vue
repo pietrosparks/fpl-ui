@@ -43,6 +43,7 @@
 
 <script>
 export default {
+  middleware: "anon",
   data() {
     return {
       user: {}

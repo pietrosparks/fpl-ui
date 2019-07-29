@@ -6,10 +6,18 @@
         <div class="col-md-6">
           <h1 class="display-2">{{ league.name }}</h1>
         </div>
-        <div v-if="isAdmin" class="col-md-6">
+        <div v-if="isAdmin && !paid" class="col-md-6">
           <b-button class="btn btn-info btn-lg mt-4 float-right" @click="modalShow = !modalShow">
             Register Group
           </b-button>
+        </div>
+        <div v-if="isAdmin && paid" class="col-md-6">
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span id="basic-addon1" class="input-group-text"><i class="fa fa-clipboard"/></span>
+            </div>
+            <input v-model="invite" type="text" class="form-control" aria-label="Invite" aria-describedby="basic-addon1">
+          </div>
         </div>
       </div>
      
@@ -41,7 +49,7 @@
       </table>
     </div>
 
-    <b-modal v-if="step === 1" v-model="modalShow" :title="'Register '+ league.name + ' for automated payments'" centered @ok="registerGroup()">
+    <b-modal v-if="step === 1" ref="paymentModal" v-model="modalShow" :title="'Register '+ league.name + ' for automated payments'" centered @ok="registerGroup()">
       <div class="form-group"/>
       <div class="form-group">
         <label for="exampleInputPassword1">How much to be collected weekly per individual</label>
@@ -72,10 +80,10 @@
 
      
       <hr>
-      <label for="exampleInputAmount1">Per Individual</label>
-      <h3>{{ totalCollectionAmount/100/standings.results.length }} x {{ gameweeksLeft }} <small>(GW left)</small></h3>
-      <label for="exampleInputAmount1">Total</label>
-      <h3>{{ totalCollectionAmount/100 }}</h3>
+      <label for="exampleInputAmount1">Ideal total per GW</label>
+      <h3>{{ group.collectionAmount * standings.results.length }}</h3>
+      <!-- <label for="exampleInputAmount1">Total</label>
+      <h3>{{ totalCollectionAmount/100 }}</h3> -->
   
     </b-modal >
 
@@ -93,6 +101,7 @@ import Navbar from "~/components/shared/navbar"
 import { mapGetters } from "vuex"
 
 export default {
+  middleware: "authenticated",
   name: "Group",
   components: {
     Navbar
@@ -105,14 +114,32 @@ export default {
       step: 1,
       group: {
         prizeShare: ""
-      }
+      },
+      invite: null,
+      paid: false
+    }
+  },
+  sockets: {
+    admin_add(data) {
+      window
+        .setTimeout(() => {
+          this.step = 1
+          this.modalShow = false
+          this.cardPayment = false
+          this.paid = true
+          this.invite = `localhost:3000/group/${this.$route.params.id}/${
+            data.invite
+          }`
+        }, 2500)
+        .bind(this)
+
+      // Fired when the socket connects.
     }
   },
   async asyncData({ app, params }) {
     return app.$axios
       .get(`http://localhost:5000/fpl/user/group/${params.id}`)
       .then(resp => {
-        console.log(resp, "resp")
         const { league, standings, groupData, events } = resp.data.data
         return {
           league,
@@ -176,17 +203,26 @@ export default {
     },
     isAdmin() {
       return this.user.id == this.league.admin_entry
+    },
+    currentAccount() {
+      return this.standings.results.find(p => p.entry == this.user.id)
     }
   },
   methods: {
     registerGroup() {
-      this.group.groupId = this.$route.params.id
       this.group.name = this.league.name
+      this.group.groupId = this.$route.params.id
       this.group.groupAdmin = this.league.admin_entry
-      this.group.adminMail = this.user.email
-      this.group.totalAmount = this.totalCollectionAmount
-      this.group.members = this.formattedMembers
+      this.group.collectionAmount = this.group.collectionAmount * 100
+      // this.group.totalAmount = this.totalCollectionAmount
+      this.group.members = this.formattedMembers.filter(
+        m => m.team_id == this.user.id
+      )
       this.group.started = this.currentGameweek.id
+      this.group.adminMail = this.user.email
+      this.group.adminAlias = this.currentAccount.entry_name
+      this.group.adminName = this.currentAccount.player_name
+      this.group.adminTeamId = this.currentAccount.entry
 
       this.$axios
         .post("http://localhost:5000/fpl/group/new", this.group)

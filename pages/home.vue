@@ -42,6 +42,7 @@ import Navbar from "~/components/shared/navbar"
 import { mapGetters } from "vuex"
 
 export default {
+  middleware: "authenticated",
   components: {
     Navbar
   },
