@@ -22,7 +22,7 @@
     "cookieparser": "^0.1.0",
     "fs": "0.0.1-security",
     "js-cookie": "^2.2.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "nuxt": "^1.0.0",
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
