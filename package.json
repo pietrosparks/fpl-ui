@@ -17,7 +17,7 @@
     "@nuxtjs/axios": "^5.3.1",
     "@nuxtjs/font-awesome": "^1.0.3",
     "@nuxtjs/toast": "^3.0.1",
-    "bootstrap-vue": "^2.0.0-rc.11",
+    "bootstrap-vue": "^2.0.0-rc.12",
     "bulma": "^0.7.1",
     "cookieparser": "^0.1.0",
     "fs": "0.0.1-security",
